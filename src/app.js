@@ -1,11 +1,11 @@
 var file_selector = document.createElement("input");
-file_selector.type = "file"
+file_selector.type = "file";
 
-var default_image = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/3840px-Blue_Marble_2002.png";
+var current_image = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Blue_Marble_2002.png/3840px-Blue_Marble_2002.png";
 
 const viewer = new PhotoSphereViewer.Viewer({
 	container: document.querySelector("#viewer"),
-	panorama: default_image,
+	panorama: current_image,
 	navbar: [
 		"zoom",
 		{
@@ -19,19 +19,31 @@ const viewer = new PhotoSphereViewer.Viewer({
 		"fullscreen",
 	],
 	minFov: 1,
-	maxFov: 90,
+	maxFov: 120,
 });
 
 file_selector.onchange = e => {
 	let new_file = e.target.files[0];
 	console.log(new_file);
+	setImage(new_file);
+}
+
+function setImage(image) {
 	let reader = new FileReader();
 	reader.addEventListener(
 		"load",
 		() => {
-			viewer.setPanorama(reader.result);
+			viewer.setPanorama(reader.result).then(
+				value => {
+					current_image = reader.result;
+				},
+				reason => {
+					alert(reason);
+					viewer.setPanorama(current_image);
+				},
+			);
 		},
 		false
 	);
-	reader.readAsDataURL(new_file);
+	reader.readAsDataURL(image);
 }
